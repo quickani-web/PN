@@ -1,0 +1,6 @@
+video_id,title,thumbnail_url,duration,views,category,destination_url
+source-unique-id-001,Building Reliable Web Platforms,https://picsum.photos/seed/vidora1/640/360,12:25,1250000,Technology,https://example.com/watch/building-reliable-web-platforms
+source-unique-id-002,Deep Ocean Research Overview,https://picsum.photos/seed/vidora2/640/360,22:00,860000,Science,https://example.com/watch/deep-ocean-research
+source-unique-id-003,Acoustic Session in Lisbon,https://picsum.photos/seed/vidora3/640/360,4:08,2100000,Music,https://example.com/watch/acoustic-lisbon
+source-unique-id-004,Weekend Guide to Kyoto,https://picsum.photos/seed/vidora4/640/360,15:55,430000,Travel,https://example.com/watch/kyoto-weekend
+source-unique-id-005,Intro to SQL Indexing,https://picsum.photos/seed/vidora5/640/360,18:40,990000,Education,https://example.com/watch/sql-indexing
