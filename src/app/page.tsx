@@ -116,7 +116,7 @@ export default async function HomePage({
             <AdSlot className="mb-5" />
             <VideoGrid
               items={home.latest}
-              emptyMessage="No listings yet. Seed categories and run the local import script."
+              emptyMessage="Listings are loading — browse categories or watch live cams."
             />
           </section>
 

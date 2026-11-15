@@ -454,17 +454,34 @@ async function queryTrending(
 
 export async function getHomepageData() {
   const [categories, latest, popular, trending] = await Promise.all([
-    getCategories(),
-    queryCatalogue({ sort: "newest", page: 1, pageSize: 12 }),
-    queryCatalogue({ sort: "views", page: 1, pageSize: 12 }),
-    queryCatalogue({ sort: "trending", page: 1, pageSize: 12 }),
+    getCategories().catch((e) => {
+      console.warn("homepage_categories_failed", e);
+      return [] as Category[];
+    }),
+    queryCatalogue({ sort: "newest", page: 1, pageSize: 12 }).catch((e) => {
+      console.warn("homepage_latest_failed", e);
+      return emptyResult(1, 12);
+    }),
+    queryCatalogue({ sort: "views", page: 1, pageSize: 12 }).catch((e) => {
+      console.warn("homepage_popular_failed", e);
+      return emptyResult(1, 12);
+    }),
+    queryCatalogue({ sort: "trending", page: 1, pageSize: 12 }).catch((e) => {
+      console.warn("homepage_trending_failed", e);
+      return emptyResult(1, 12);
+    }),
   ]);
+
+  // Never leave homepage sections blank if we have any catalogue rows
+  const latestItems = latest.items;
+  const popularItems = popular.items.length ? popular.items : latestItems;
+  const trendingItems = trending.items.length ? trending.items : popularItems;
 
   return {
     categories,
-    latest: latest.items,
-    popular: popular.items,
-    trending: trending.items,
+    latest: latestItems,
+    popular: popularItems,
+    trending: trendingItems,
     featuredCategories: categories.slice(0, 12),
   };
 }
