@@ -131,8 +131,10 @@ function isStableThumb(url: string) {
   // Signed pix-* thumbs expire (410/472) — never use as covers
   if (url.includes("pix-cdn77.") || url.includes("pix-fl.")) return false;
   if (url.includes("validto=") || url.includes("hdnea=")) return false;
+  // Our persisted Storage thumbs
+  if (url.includes("/storage/v1/object/public/thumbnails/")) return true;
   if (url.includes("ei.phncdn.com") || url.includes("di.phncdn.com")) return true;
-  if (/\.(jpe?g|png|webp)(\?|$)/i.test(url)) return true;
+  if (/\.(jpe?g|png|webp|avif|gif)(\?|$)/i.test(url)) return true;
   return false;
 }
 
@@ -173,19 +175,31 @@ async function loadCategoriesUncached(): Promise<Category[]> {
     }
   }
 
-  // Fill missing covers (and exact counts when junction empty) in parallel
+  // Fill missing covers — prefer our Storage URLs (post-backfill)
   const needsCover = data.filter((c) => !coverByCat.has(c.id));
   if (needsCover.length) {
     await Promise.all(
       needsCover.map(async (c) => {
-        const { data: rows } = await supabase
+        const { data: storedRows } = await supabase
           .from("videos")
           .select("thumbnail_url")
           .eq("category_id", c.id)
-          .like("thumbnail_url", "https://ei.phncdn.com%")
+          .like("thumbnail_url", "%/storage/v1/object/public/thumbnails/%")
           .order("views", { ascending: false })
           .limit(1);
-        const thumb = rows?.[0]?.thumbnail_url;
+        let thumb = storedRows?.[0]?.thumbnail_url || null;
+        if (!thumb) {
+          const { data: anyRows } = await supabase
+            .from("videos")
+            .select("thumbnail_url")
+            .eq("category_id", c.id)
+            .like("thumbnail_url", "https://%")
+            .order("views", { ascending: false })
+            .limit(3);
+          thumb =
+            (anyRows || []).find((r) => isStableThumb(r.thumbnail_url))
+              ?.thumbnail_url || null;
+        }
         if (thumb && isStableThumb(thumb)) coverByCat.set(c.id, thumb);
       }),
     );
@@ -222,7 +236,7 @@ async function loadCategoriesUncached(): Promise<Category[]> {
 
 const getCachedCategories = unstable_cache(
   loadCategoriesUncached,
-  ["vidora-categories-v4"],
+  ["vidora-categories-v5"],
   { revalidate: 120 },
 );
 
