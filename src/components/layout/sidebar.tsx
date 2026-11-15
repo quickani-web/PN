@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LiveCamsPromo } from "@/components/ads/live-cams-promo";
 import { formatCategoryName } from "@/lib/utils";
 import type { Category } from "@/lib/types";
 
@@ -12,6 +13,9 @@ export function CategorySidebar({
   return (
     <aside className="hidden w-56 shrink-0 lg:block">
       <div className="sticky top-20 space-y-1">
+        <div className="mb-3 px-0.5">
+          <LiveCamsPromo compact />
+        </div>
         <h2 className="mb-2 px-2 text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
           Categories
         </h2>

@@ -6,6 +6,7 @@ import { CategorySidebar } from "@/components/layout/sidebar";
 import { ListingFilters } from "@/components/filters/listing-filters";
 import { Pagination } from "@/components/filters/pagination";
 import { AdSlot } from "@/components/ads/ad-slot";
+import { LiveCamsPromo } from "@/components/ads/live-cams-promo";
 import { CategoryCard } from "@/components/category/category-card";
 import { JsonLd } from "@/components/seo/json-ld";
 import { getCategories, getHomepageData, queryCatalogue } from "@/lib/catalogue";
@@ -111,6 +112,7 @@ export default async function HomePage({
             <Suspense fallback={null}>
               <ListingFilters categories={home.categories} />
             </Suspense>
+            <LiveCamsPromo className="mb-5" />
             <AdSlot className="mb-5" />
             <VideoGrid
               items={home.latest}
