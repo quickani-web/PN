@@ -1,5 +1,5 @@
 import { SafeThumbnail } from "@/components/media/safe-thumbnail";
-import { formatDuration, formatViews } from "@/lib/utils";
+import { formatCategoryName, formatDuration, formatViews } from "@/lib/utils";
 import type { ListingCard } from "@/lib/types";
 
 export function VideoCard({ listing }: { listing: ListingCard }) {
@@ -27,7 +27,7 @@ export function VideoCard({ listing }: { listing: ListingCard }) {
         <div className="mt-1 flex items-center gap-2 text-xs text-zinc-400">
           <span>{formatViews(listing.views)} views</span>
           <span className="text-zinc-600">•</span>
-          <span className="truncate">{listing.category.name}</span>
+          <span className="truncate">{formatCategoryName(listing.category.name)}</span>
         </div>
       </a>
     </article>

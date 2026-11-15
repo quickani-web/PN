@@ -14,7 +14,7 @@ import {
   queryCatalogue,
 } from "@/lib/catalogue";
 import { parseListingSearchParams } from "@/lib/parse-search-params";
-import { absoluteUrl } from "@/lib/utils";
+import { absoluteUrl, formatCategoryName } from "@/lib/utils";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -72,7 +72,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           ]}
         />
         <h1 className="mb-1 font-[family-name:var(--font-display)] text-2xl font-semibold text-zinc-50">
-          {category.name}
+          {formatCategoryName(category.name)}
         </h1>
         {category.description && (
           <p className="mb-2 max-w-2xl text-sm text-zinc-400">

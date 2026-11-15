@@ -3,6 +3,7 @@ import { Space_Grotesk, Manrope } from "next/font/google";
 import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
+import { AgeGate } from "@/components/layout/age-gate";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import {
@@ -58,6 +59,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={`${display.variable} ${body.variable} antialiased`}>
+        <AgeGate appName={config.appName} />
         <Suspense fallback={<div className="h-14 border-b border-zinc-800" />}>
           <NavigationPendingProvider>
             <Header categories={categories} />

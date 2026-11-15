@@ -28,6 +28,19 @@ export function formatViews(views: number): string {
   return String(views);
 }
 
+/** Readable category label (POV / MILF stay uppercase; others title-cased). */
+export function formatCategoryName(name: string): string {
+  if (!name) return "Category";
+  if (/^[A-Z0-9-]{2,6}$/i.test(name) && !/\s/.test(name)) {
+    return name.toUpperCase();
+  }
+  return name
+    .split(/[\s_-]+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
 export function parseDurationToSeconds(input: string | number): number | null {
   if (typeof input === "number") {
     return Number.isFinite(input) && input >= 0 ? Math.floor(input) : null;

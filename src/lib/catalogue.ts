@@ -451,7 +451,7 @@ export async function getHomepageData() {
     latest: latest.items,
     popular: popular.items,
     trending: trending.items,
-    featuredCategories: categories.slice(0, 8),
+    featuredCategories: categories.slice(0, 12),
   };
 }
 

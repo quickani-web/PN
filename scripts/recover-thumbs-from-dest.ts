@@ -163,39 +163,36 @@ async function main() {
   let failed = 0;
   let skipped = 0;
   let scanned = 0;
-  const hardFailIds = new Set<string>();
+  let lastId = "00000000-0000-0000-0000-000000000000";
 
   console.log(`Recover via destination pages. tabs=${tabs} limit=${limit || "all"}`);
+
+  const isPix = (thumb: string) =>
+    thumb.includes("pix-cdn77.") || thumb.includes("pix-fl.");
 
   try {
     for (;;) {
       if (limit && saved + failed >= limit) break;
 
-      // Always take from offset 0: successful rows leave the pix-* filter.
-      // Skip known hard-fail ids in-memory so we don't loop forever.
+      // Keyset by id — avoids ilike+ORDER BY views timeouts on large tables
       const { data, error } = await supabase
         .from("videos")
         .select("id,video_id,destination_url,thumbnail_url,views")
-        .or("thumbnail_url.ilike.%pix-cdn77%,thumbnail_url.ilike.%pix-fl%")
-        .order("views", { ascending: false })
+        .gt("id", lastId)
+        .order("id", { ascending: true })
         .limit(pageSize);
 
       if (error) throw error;
       if (!data?.length) break;
+      lastId = data[data.length - 1].id;
 
       const todo = data.filter(
         (row) =>
-          !hardFailIds.has(row.id) &&
+          isPix(row.thumbnail_url || "") &&
           row.destination_url?.startsWith("https://") &&
           !isStoredThumbUrl(row.thumbnail_url, url),
       );
       skipped += data.length - todo.length;
-
-      if (!todo.length) {
-        // Entire page is hard-fails — stop to avoid infinite loop
-        console.log("No recoverable rows left in current page.");
-        break;
-      }
 
       for (let i = 0; i < todo.length; i += tabs) {
         if (limit && saved + failed >= limit) break;
@@ -208,7 +205,6 @@ async function main() {
               const fresh = await extractThumb(page, row.destination_url);
               if (!fresh) {
                 failed += 1;
-                hardFailIds.add(row.id);
                 if (failed <= 20 || failed % 100 === 0) {
                   console.log(`no-thumb ${row.video_id}`);
                 }
@@ -223,7 +219,6 @@ async function main() {
               );
               if (!stored.ok) {
                 failed += 1;
-                hardFailIds.add(row.id);
                 console.log(`store-fail ${row.video_id}: ${stored.error}`);
                 return;
               }
@@ -234,14 +229,12 @@ async function main() {
                 .eq("id", row.id);
               if (upErr) {
                 failed += 1;
-                hardFailIds.add(row.id);
                 console.log(`db ${row.video_id}: ${upErr.message}`);
                 return;
               }
               saved += 1;
             } catch (e) {
               failed += 1;
-              hardFailIds.add(row.id);
               const msg = e instanceof Error ? e.message : String(e);
               if (failed <= 25 || failed % 100 === 0) {
                 console.log(`err ${row.video_id}: ${msg.slice(0, 120)}`);
@@ -252,15 +245,8 @@ async function main() {
       }
 
       scanned += data.length;
-      console.log(
-        JSON.stringify({
-          scanned,
-          saved,
-          failed,
-          skipped,
-          hardFails: hardFailIds.size,
-        }),
-      );
+      console.log(JSON.stringify({ scanned, saved, failed, skipped, lastId }));
+      if (data.length < pageSize) break;
     }
   } finally {
     await browser.close();

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatCategoryName } from "@/lib/utils";
 import type { Category } from "@/lib/types";
 
 export function CategorySidebar({
@@ -34,7 +35,7 @@ export function CategorySidebar({
                 : "text-zinc-300 hover:bg-zinc-900 hover:text-white"
             }`}
           >
-            <span className="truncate">{c.name}</span>
+            <span className="truncate">{formatCategoryName(c.name)}</span>
             <span className="ml-2 text-[11px] tabular-nums text-zinc-500">
               {c.video_count ?? 0}
             </span>
