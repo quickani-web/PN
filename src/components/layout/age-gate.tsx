@@ -39,6 +39,7 @@ export function AgeGate({ appName }: Props) {
     } catch {
       // ignore
     }
+    window.dispatchEvent(new Event("vidora-age-verified"));
     setOpen(false);
   }
 

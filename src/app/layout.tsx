@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Manrope } from "next/font/google";
 import { Suspense } from "react";
+import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { AgeGate } from "@/components/layout/age-gate";
@@ -13,6 +14,9 @@ import {
 import { getCategoryNav } from "@/lib/catalogue";
 import { config } from "@/lib/config";
 import { absoluteUrl } from "@/lib/utils";
+
+const EXO_CLIENT_HINTS =
+  "Sec-CH-UA https://s.magsrv.com; Sec-CH-UA-Mobile https://s.magsrv.com; Sec-CH-UA-Arch https://s.magsrv.com; Sec-CH-UA-Model https://s.magsrv.com; Sec-CH-UA-Platform https://s.magsrv.com; Sec-CH-UA-Platform-Version https://s.magsrv.com; Sec-CH-UA-Bitness https://s.magsrv.com; Sec-CH-UA-Full-Version-List https://s.magsrv.com; Sec-CH-UA-Full-Version https://s.magsrv.com;";
 
 const display = Space_Grotesk({
   subsets: ["latin"],
@@ -63,6 +67,9 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        <meta httpEquiv="Delegate-CH" content={EXO_CLIENT_HINTS} />
+      </head>
       <body className={`${display.variable} ${body.variable} antialiased`}>
         <AgeGate appName={config.appName} />
         <Suspense fallback={<div className="h-14 border-b border-zinc-800" />}>
@@ -76,6 +83,10 @@ export default async function RootLayout({
             </NavigationBusyOverlay>
           </NavigationPendingProvider>
         </Suspense>
+        <Script
+          src="https://a.magsrv.com/ad-provider.js"
+          strategy="afterInteractive"
+        />
         <Analytics />
       </body>
     </html>
