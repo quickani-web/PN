@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
+import { ExoClickPopunder } from "@/components/ads/exoclick-popunder";
 import { AgeGate } from "@/components/layout/age-gate";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -72,6 +73,7 @@ export default async function RootLayout({
       </head>
       <body className={`${display.variable} ${body.variable} antialiased`}>
         <AgeGate appName={config.appName} />
+        <ExoClickPopunder />
         <Suspense fallback={<div className="h-14 border-b border-zinc-800" />}>
           <NavigationPendingProvider>
             <Header categories={categories} />
