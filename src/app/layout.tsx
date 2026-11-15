@@ -45,6 +45,7 @@ export const metadata: Metadata = {
   other: {
     // Restricted To Adults — same label used industry-wide
     rating: "RTA-5042-1996-1400-1577-RTA",
+    "6a97888e-site-verification": "bc6183140cb3c4fc25d36049a7908713",
   },
 };
 
