@@ -22,6 +22,10 @@ import {
   validateThumbnailUrl,
 } from "../src/lib/security/urls";
 import { parseDurationToSeconds, slugify } from "../src/lib/utils";
+import {
+  downloadAndStoreThumb,
+  ensureThumbBucket,
+} from "./lib/thumb-storage";
 
 function parseViews(input: string): number | null {
   const raw = String(input || "").trim().replace(/,/g, "").toUpperCase();
@@ -180,6 +184,7 @@ async function main() {
   const supabase = createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+  await ensureThumbBucket(supabase);
 
   const absolute = path.resolve(filePath);
   const parsed = await parseFile(absolute);
@@ -355,6 +360,33 @@ async function main() {
     });
   });
 
+  // Persist thumbnails into our Storage before insert (so cards never hotlink)
+  let thumbsSaved = 0;
+  let thumbsFailed = 0;
+  const thumbConcurrency = 8;
+  for (let i = 0; i < valid.length; i += thumbConcurrency) {
+    const slice = valid.slice(i, i + thumbConcurrency);
+    await Promise.all(
+      slice.map(async (row) => {
+        const stored = await downloadAndStoreThumb(
+          supabase,
+          url,
+          row.video_id,
+          row.thumbnail_url,
+        );
+        if (stored.ok) {
+          row.thumbnail_url = stored.publicUrl;
+          thumbsSaved += 1;
+        } else {
+          thumbsFailed += 1;
+        }
+      }),
+    );
+    if ((i + thumbConcurrency) % 200 < thumbConcurrency) {
+      console.log(`thumbs ${Math.min(i + thumbConcurrency, valid.length)}/${valid.length}`);
+    }
+  }
+
   const batchSize = 200;
   let imported = 0;
   for (let i = 0; i < valid.length; i += batchSize) {
@@ -386,6 +418,8 @@ async function main() {
         totalRows: parsed.rows.length,
         valid: valid.length,
         imported,
+        thumbsSaved,
+        thumbsFailed,
         skippedOrInvalid: parsed.rows.length - valid.length,
         skipCounts,
         errorFile: "import-errors.txt",

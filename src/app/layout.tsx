@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Manrope } from "next/font/google";
 import { Suspense } from "react";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -68,6 +69,7 @@ export default async function RootLayout({
             </NavigationBusyOverlay>
           </NavigationPendingProvider>
         </Suspense>
+        <Analytics />
       </body>
     </html>
   );

@@ -44,12 +44,19 @@ function mapVideo(
   const categoryRel = Array.isArray(row.categories)
     ? row.categories[0]
     : row.categories;
+  const rawThumb = row.thumbnail_url || "";
+  const fragile =
+    rawThumb.includes("pix-cdn77.") ||
+    rawThumb.includes("pix-fl.") ||
+    rawThumb.includes("validto=") ||
+    rawThumb.includes("hdnea=");
   return {
     id: row.id,
     video_id: row.video_id,
     title: row.title,
     slug: row.slug,
-    thumbnailUrl: row.thumbnail_url,
+    // Hide known-dead hotlinks so the UI shows a placeholder until Storage backfill finishes
+    thumbnailUrl: fragile ? "" : rawThumb,
     durationSeconds: row.duration_seconds,
     views: Number(row.views || 0),
     category: {
@@ -121,9 +128,11 @@ export const getCategoryNav = cache(async function getCategoryNav(): Promise<
 
 function isStableThumb(url: string) {
   if (!url?.startsWith("https://")) return false;
-  if (url.includes("validto=")) return false;
-  if (/\.(jpe?g|png|webp)(\?|$)/i.test(url)) return true;
+  // Signed pix-* thumbs expire (410/472) — never use as covers
+  if (url.includes("pix-cdn77.") || url.includes("pix-fl.")) return false;
+  if (url.includes("validto=") || url.includes("hdnea=")) return false;
   if (url.includes("ei.phncdn.com") || url.includes("di.phncdn.com")) return true;
+  if (/\.(jpe?g|png|webp)(\?|$)/i.test(url)) return true;
   return false;
 }
 
@@ -169,15 +178,15 @@ async function loadCategoriesUncached(): Promise<Category[]> {
   if (needsCover.length) {
     await Promise.all(
       needsCover.map(async (c) => {
-        const { data: row } = await supabase
+        const { data: rows } = await supabase
           .from("videos")
           .select("thumbnail_url")
           .eq("category_id", c.id)
-          .like("thumbnail_url", "http%")
+          .like("thumbnail_url", "https://ei.phncdn.com%")
           .order("views", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        if (row?.thumbnail_url) coverByCat.set(c.id, row.thumbnail_url);
+          .limit(1);
+        const thumb = rows?.[0]?.thumbnail_url;
+        if (thumb && isStableThumb(thumb)) coverByCat.set(c.id, thumb);
       }),
     );
   }
@@ -213,7 +222,7 @@ async function loadCategoriesUncached(): Promise<Category[]> {
 
 const getCachedCategories = unstable_cache(
   loadCategoriesUncached,
-  ["vidora-categories-v3"],
+  ["vidora-categories-v4"],
   { revalidate: 120 },
 );
 

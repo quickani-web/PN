@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { SafeThumbnail } from "@/components/media/safe-thumbnail";
 import { formatDuration, formatViews } from "@/lib/utils";
 import type { ListingCard } from "@/lib/types";
 
@@ -12,14 +12,10 @@ export function VideoCard({ listing }: { listing: ListingCard }) {
         className="block focus-visible:outline-none"
       >
         <div className="relative aspect-video overflow-hidden rounded-md bg-zinc-900 ring-1 ring-zinc-800 transition group-hover:ring-amber-500/60 group-focus-visible:ring-2 group-focus-visible:ring-amber-400">
-          <Image
+          <SafeThumbnail
             src={listing.thumbnailUrl}
             alt={listing.title}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-            className="object-cover transition duration-200 group-hover:scale-[1.03]"
-            loading="lazy"
-            unoptimized
+            className="transition duration-200 group-hover:scale-[1.03]"
           />
           <span className="absolute bottom-1.5 right-1.5 rounded bg-black/80 px-1.5 py-0.5 text-[11px] font-semibold tabular-nums text-white">
             {formatDuration(listing.durationSeconds)}
