@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     "Browse a catalogue of video links with thumbnails, duration, views and categories. Click through to authorized external destinations. We do not host video files.",
   applicationName: config.appName,
   icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    icon: [{ url: "/icon", type: "image/png" }],
     apple: [{ url: "/apple-icon", type: "image/png" }],
   },
   openGraph: {
