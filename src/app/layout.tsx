@@ -42,6 +42,10 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
   alternates: { canonical: absoluteUrl("/") },
+  other: {
+    // Restricted To Adults — same label used industry-wide
+    rating: "RTA-5042-1996-1400-1577-RTA",
+  },
 };
 
 export default async function RootLayout({
